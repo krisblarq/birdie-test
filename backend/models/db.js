@@ -12,19 +12,3 @@ async function query(sql, params) {
 module.exports = {
   query,
 };
-// const pool = createPool({
-//   host: dbConfig.HOST,
-//   user: dbConfig.USER,
-//   password: dbConfig.PASSWORD,
-//   database: dbConfig.DB,
-// });
-// // Open mysql connection
-// pool.connect((err) => {
-//   if (err) {
-//     console.log("Error connecting to Db");
-//     return;
-//   }
-//   console.log("Connection established");
-// });
-
-// module.exports = pool;
