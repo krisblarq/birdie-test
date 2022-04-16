@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const events = require("../config/event");
+const events = require("../models/event");
 
 /* GET events. */
 router.get("/", async function (req, res, next) {
@@ -13,3 +13,4 @@ router.get("/", async function (req, res, next) {
 });
 
 module.exports = router;
+
