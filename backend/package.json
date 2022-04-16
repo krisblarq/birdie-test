@@ -37,13 +37,17 @@
     ]
   },
   "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
-  "main": "server.js",
+  "main": "index.js",
   "keywords": [
     "node.js",
     "express",
     "mysql",
-    "restapi"
+    "restapi",
+    "heroku"
   ],
+  "engines": {
+    "node": "16.14.0"
+  },
   "author": "chris",
   "license": "ISC"
 }
