@@ -1,36 +1,32 @@
-import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar";
-import ObservationTable from "./ObservationTable";
-import tw, { styled } from "twin.macro";
+import "./App.css";
+import tw from "twin.macro";
+import ObservationInfo from "./components/ObservationInfo";
 
-const url = "http://localhost:3306/events";
+const AppContainer = tw.div`
+  w-full
+  max-w-full
+  flex
+  flex-col
+  items-center
+  justify-center
+  pt-6
+  pb-10
+  pl-10
+  pr-10
+`;
 
-const App = () => {
-  const [loading, setLoading] = useState(false);
-  const [events, setEvents] = useState([]);
+const Title = tw.h1`
+  text-2xl
+  font-semibold
+`;
 
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(url);
-      const events = await response.json();
-      setLoading(false);
-      setEvents(events);
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-    }
-  };
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
+function App() {
   return (
-    <div>
-      <Navbar />
-      <ObservationTable />
-    </div>
+    <AppContainer>
+      <Title>React Tables</Title>
+      <ObservationInfo />
+    </AppContainer>
   );
-};
+}
 
 export default App;

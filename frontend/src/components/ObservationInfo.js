@@ -1,7 +1,7 @@
-import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { useTable } from "react-table";
-import tw, { styled } from "twin.macro";
+import tw from "twin.macro";
 
 const Table = tw.table`
   table-fixed
@@ -32,32 +32,31 @@ border
 border-green-500
 p-5
 `;
-const url = "http://localhost:3306/events";
 
-const ObservationTable = () => {
-  const [loading, setLoading] = useState(false);
+const ObservationInfo = (props) => {
   const [events, setEvents] = useState([]);
 
   const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(url);
-      const events = await response.json();
-      setLoading(false);
+    const response = await axios
+      .get("http://localhost:3306/events")
+      .catch((err) => console.log(err));
+
+    if (response) {
+      const events = response.data;
+
+      console.log("Events: ", events);
       setEvents(events);
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
     }
   };
 
+  console.log(events);
   const columns = useMemo(() => [
     {
       Header: "Date",
       accessor: "timestamp",
     },
     {
-      Header: "Obbserved Events",
+      Header: "Observed Events",
       columns: [
         {
           Header: "Event Type",
@@ -90,10 +89,10 @@ const ObservationTable = () => {
                 key ===
                 [
                   "timestamp",
-                  "event_type",
-                  "fluid",
+                  "events_type",
                   "consumed_volume_ml",
                   "task_definition_description",
+                  "fluid",
                 ]
             )
             .map((key) => {
@@ -113,24 +112,18 @@ const ObservationTable = () => {
     columns: eventsColumns,
     data: eventsData,
   });
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    state,
-  } = tableInstance;
+
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    tableInstance;
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
+  const isEven = (idx) => idx % 2 === 0;
+
   return (
-    <div>
-      <header>
-        <h3>Care Recipient Observation Summary</h3>
-      </header>
+    <>
       <Table {...getTableProps()}>
         <TableHead>
           {headerGroups.map((headerGroup) => (
@@ -146,9 +139,27 @@ const ObservationTable = () => {
             </TableRow>
           ))}
         </TableHead>
+        <TableBody {...getTableBodyProps()}>
+          {rows.map((row, idx) => {
+            prepareRow(row);
+
+            return (
+              <TableRow
+                {...row.getRowProps()}
+                className={isEven(idx) ? "bg-green-400 bg-opacity-30" : ""}
+              >
+                {row.cells.map((cell, idx) => (
+                  <TableData {...cell.getCellProps()}>
+                    {cell.render("Cell")}
+                  </TableData>
+                ))}
+              </TableRow>
+            );
+          })}
+        </TableBody>
       </Table>
-    </div>
+    </>
   );
 };
 
-export default ObservationTable;
+export default ObservationInfo;
