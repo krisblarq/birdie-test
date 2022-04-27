@@ -1,163 +1,60 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useTable } from "react-table";
-import tw from "twin.macro";
+import { DataGrid } from "@material-ui/data-grid";
+import { CssBaseline, AppBar, Toolbar, Typography } from "@material-ui/core";
+import useStyles from "../styles/styles";
 
-const Table = tw.table`
-  table-fixed
-  text-base
-  text-gray-900
-`;
-
-const TableHead = tw.thead`
-  p-2
-`;
-
-const TableRow = tw.tr`
-border
-border-green-500
-`;
-
-const TableHeader = tw.th`
-border
-border-green-500
-p-2
-`;
-
-const TableBody = tw.tbody`
-`;
-
-const TableData = tw.td`
-border
-border-green-500
-p-5
-`;
-
-const ObservationInfo = (props) => {
+const columns = [
+  { field: "timestamp", headerName: "Timestamp", width: 200 },
+  { field: "event_type", headerName: "Event Type", width: 220 },
+  { field: "consumed_volume_ml", headerName: "Vol Consumed", width: 200 },
+  { field: "task_definition_description", headerName: "Task", width: 300 },
+  { field: "fluid", headerName: "Fluid", width: 200 },
+];
+const ObservationInfo = () => {
   const [events, setEvents] = useState([]);
+  const classes = useStyles();
 
-  const fetchEvents = async () => {
-    const response = await axios
-      .get("http://localhost:3306/events")
-      .catch((err) => console.log(err));
-
-    if (response) {
-      const events = response.data;
-
-      console.log("Events: ", events);
-      setEvents(events);
-    }
-  };
-
-  console.log(events);
-  const columns = useMemo(() => [
-    {
-      Header: "Date",
-      accessor: "timestamp",
-    },
-    {
-      Header: "Observed Events",
-      columns: [
-        {
-          Header: "Event Type",
-          accessor: "event_type",
-        },
-        {
-          Header: "Fluid Type",
-          accessor: "fluid",
-        },
-        {
-          Header: "Amount Consumed",
-          accessor: "consumed_volume_ml",
-        },
-        {
-          Header: "Task Definition",
-          accessor: "task_definition_description",
-        },
-      ],
-    },
-  ]);
-
-  const eventsData = useMemo(() => [...events], [events]);
-
-  const eventsColumns = useMemo(
-    () =>
-      events[0]
-        ? Object.keys(events[0])
-            .filter(
-              (key) =>
-                key ===
-                [
-                  "timestamp",
-                  "events_type",
-                  "consumed_volume_ml",
-                  "task_definition_description",
-                  "fluid",
-                ]
-            )
-            .map((key) => {
-              if (key === "timestamp")
-                return {
-                  Header: key,
-                  accessor: key,
-                };
-
-              return { Header: key, accessor: key };
-            })
-        : [],
-    [events]
-  );
-
-  const tableInstance = useTable({
-    columns: eventsColumns,
-    data: eventsData,
-  });
-
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    tableInstance;
+  const url = "http://localhost:3306/events";
 
   useEffect(() => {
-    fetchEvents();
+    axios
+      .get(url)
+      .then((res) => {
+        if (res.data !== undefined) {
+          setEvents(res.data.data);
+        }
+      })
+      .catch((err) => {});
   }, []);
-
-  const isEven = (idx) => idx % 2 === 0;
-
+  console.log(events);
+  const processedEvents = events?.map((event) => event.payload);
+  console.log(processedEvents);
   return (
     <>
-      <Table {...getTableProps()}>
-        <TableHead>
-          {headerGroups.map((headerGroup) => (
-            <TableRow {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <TableHeader
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                >
-                  {column.render("Header")}
-                  {column.isSorted ? (column.isSortedDesc ? " ▼" : " ▲") : ""}
-                </TableHeader>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody {...getTableBodyProps()}>
-          {rows.map((row, idx) => {
-            prepareRow(row);
-
-            return (
-              <TableRow
-                {...row.getRowProps()}
-                className={isEven(idx) ? "bg-green-400 bg-opacity-30" : ""}
-              >
-                {row.cells.map((cell, idx) => (
-                  <TableData {...cell.getCellProps()}>
-                    {cell.render("Cell")}
-                  </TableData>
-                ))}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <CssBaseline />
+      <AppBar position="relative">
+        <Toolbar>
+          <Typography variant="h4" align="center" gutterbottom>
+            Birdie
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <main>
+        <div className={classes.main}>
+          <Typography mt={10} variant="h4" align="center" gutterbottom>
+            Observed Events Presentation
+          </Typography>
+        </div>
+        <div style={{ height: 700, width: "90%", margin: "auto" }}>
+          <DataGrid
+            rows={processedEvents}
+            columns={columns}
+            pageSize={10}
+            checkboxSelection
+          />
+        </div>
+      </main>
     </>
   );
 };
